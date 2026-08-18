@@ -33,6 +33,9 @@ app.get('/', (req, res) => {
     res.json({
         endpoints: {
             items: '/api/items',
+            select: '/api/select (POST)',
+            deselect: '/api/deselect (POST)',
+            addItem: '/api/add-item (POST)',
         }
     });
 });
@@ -70,6 +73,41 @@ app.get('/api/items', (req, res) => {
         page: pageNum,
         hasMore: (pageNum + 1) * 20 < total
     });
+});
+
+app.post('/api/select', (req, res) => {
+    const { id } = req.body;
+    if (id && !state.selectedIds.has(id)) {
+        requestQueue.add('SELECT', { id });
+    }
+    res.json({ success: true });
+});
+
+app.post('/api/deselect', (req, res) => {
+    const { id } = req.body;
+    if (id && state.selectedIds.has(id)) {
+        requestQueue.add('DESELECT', { id });
+    }
+    res.json({ success: true });
+});
+app.post('/api/add-item', (req, res) => {
+    const { id } = req.body;
+    const parsedId = parseInt(id);
+
+    if (isNaN(parsedId) || parsedId < 1) {
+        return res.status(400).json({ error: 'Invalid ID' });
+    }
+
+    // Проверяем, что ID не занят
+    const exists = state.allItems.some(item => item.id === parsedId) ||
+        state.selectedIds.has(parsedId);
+
+    if (exists) {
+        return res.status(400).json({ error: 'ID already exists' });
+    }
+
+    requestQueue.add('ADD_ITEM', { id: parsedId });
+    res.json({ success: true });
 });
 
 app.listen(PORT, () => {
