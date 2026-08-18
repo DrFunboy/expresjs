@@ -165,6 +165,7 @@ app.get('/', (req, res) => {
             select: '/api/select (POST)',
             deselect: '/api/deselect (POST)',
             addItem: '/api/add-item (POST)',
+            reorder: '/api/reorder (POST)',
         }
     });
 });
@@ -203,7 +204,6 @@ app.get('/api/items', (req, res) => {
         hasMore: (pageNum + 1) * 20 < total
     });
 });
-
 app.post('/api/select', (req, res) => {
     const { id } = req.body;
     if (id && !state.selectedIds.has(id)) {
@@ -211,7 +211,6 @@ app.post('/api/select', (req, res) => {
     }
     res.json({ success: true });
 });
-
 app.post('/api/deselect', (req, res) => {
     const { id } = req.body;
     if (id && state.selectedIds.has(id)) {
@@ -236,6 +235,16 @@ app.post('/api/add-item', (req, res) => {
     }
 
     requestQueue.add('ADD_ITEM', { id: parsedId });
+    res.json({ success: true });
+});
+app.post('/api/reorder', (req, res) => {
+    const { ids } = req.body;
+    if (Array.isArray(ids) && ids.length > 0) {
+        const allSelected = ids.every(id => state.selectedIds.has(id));
+        if (allSelected) {
+            requestQueue.add('REORDER', { ids });
+        }
+    }
     res.json({ success: true });
 });
 
