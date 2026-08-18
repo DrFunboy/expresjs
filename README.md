@@ -25,5 +25,6 @@
 * Батчинг добавления элементов раз в 10 сек, получения и изменения данных раз в секунду.
 
 Технологии:
-Бэкенд — Express.js
+Бэкенд — Express.js 
 Фронтенд — JQuery
+Хостер -https://dashboard.render.com/web/srv-da241iqjnfac73aj51kg
